@@ -5,7 +5,7 @@ window.SHOP = {
   env: 'sandbox',
   clientToken: 'test_c8c209ac17d24180d9afb2dbf58',
   // License server (Cloudflare Worker, license-server/ in the extant repo).
-  licenseApi: 'https://extant-license.REPLACE.workers.dev',
+  licenseApi: 'https://extant-license.extant-license-server.workers.dev',
   supportEmail: 'support@example.com',
   seller: 'Serhii Solutions',
   products: {

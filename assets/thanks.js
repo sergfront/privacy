@@ -18,6 +18,7 @@
       .then(function (r) {
         if (r.status === 200) return show(r.body.license_key);
         if ((r.status === 409 || r.status >= 500) && tries < 30) return setTimeout(attempt, 2000);
+        if (r.status === 410) return fail(r.body.error);
         fail();
       })
       .catch(function () { tries < 30 ? setTimeout(attempt, 2000) : fail(); });
@@ -32,7 +33,11 @@
       navigator.clipboard.writeText(key).then(function () { btn.textContent = 'Copied'; });
     };
   }
-  function fail() {
+  function fail(reason) {
+    if (reason) {
+      status.innerHTML = reason + ' Questions? Email ' + mail + '.';
+      return;
+    }
     status.innerHTML = 'We could not get your key right now. Your payment is safe — reload this page in a minute, or email ' + mail + ' with order ID <code>' + txn + '</code>.';
   }
   attempt();
