@@ -31,10 +31,14 @@ function page({ file, title, description, body, scripts = '', wide = false }) {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta property="og:image" content="https://totefile.com/assets/icon-512.png">
 </head>
 <body>
 <header class="site"><div class="wrap">
-  <a class="brand" href="./"><span class="mark">⇩</span>${esc(SHOP.brand)}</a>
+  <a class="brand" href="./"><img class="logo" src="assets/logo.svg" alt="" width="30" height="30">${esc(SHOP.brand)}</a>
   <nav><a href="./#products">Products</a><a href="./#pricing">Pricing</a><a href="./#faq">FAQ</a><a href="./#support">Support</a></nav>
 </div></header>
 <main>${wide ? body : `<div class="wrap">${body}</div>`}</main>

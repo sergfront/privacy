@@ -149,3 +149,4 @@ code { font-size: .9em; }
 .win .body { overflow-x: auto; }
 .demo, .stack, .info { min-width: 0; }
 @media (max-width: 560px) { .win th, .win td { padding: 4px; font-size: 11.5px; } .hero { padding-top: 40px; } }
+.brand .logo { width: 30px; height: 30px; }
