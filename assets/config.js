@@ -3,6 +3,9 @@
 window.SHOP = {
   // "sandbox" while testing; switch to "live" with the live token and live price IDs.
   env: 'sandbox',
+  // false until Paddle approves the live account: buy.html then says Pro is coming soon
+  // instead of opening checkout (add ?test=1 to open the sandbox checkout for testing).
+  salesOpen: false,
   clientToken: 'test_c8c209ac17d24180d9afb2dbf58',
   // License server (Cloudflare Worker, license-server/ in the extant repo).
   licenseApi: 'https://api.totefile.com',

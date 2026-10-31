@@ -12,6 +12,13 @@
   document.getElementById('title').textContent = product.name + ' — Pro';
   document.title = product.name + ' — Checkout';
 
+  if (!S.salesOpen && q.get('test') !== '1') {
+    var mail = 'mailto:' + S.supportEmail + '?subject=' + encodeURIComponent('Notify me: ' + product.name + ' Pro');
+    status.innerHTML = 'Pro is launching in a few days. The free version already works — install it and use it today.<br><br>' +
+      '<a class="btn primary" href="' + mail + '">Email me when Pro is available</a> <a class="btn" href="./#' + id + '">Back</a>';
+    return;
+  }
+
   if (S.env === 'sandbox') Paddle.Environment.set('sandbox');
   Paddle.Initialize({
     token: S.clientToken,
