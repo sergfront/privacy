@@ -5,8 +5,10 @@ window.SHOP = {
   env: 'sandbox',
   clientToken: 'test_c8c209ac17d24180d9afb2dbf58',
   // License server (Cloudflare Worker, license-server/ in the extant repo).
-  licenseApi: 'https://extant-license.extant-license-server.workers.dev',
+  licenseApi: 'https://api.totefile.com',
   supportEmail: 'sergefrontend@gmail.com',
+  brand: 'Totefile',
+  // Legal seller (Paddle account name); shown as "Totefile is a product of …".
   seller: 'Serhii Solutions',
   products: {
     'amazon-invoices': {

@@ -1,12 +1,20 @@
 // Builds the static shop pages from assets/config.js. Run: node tools/build.mjs
 // The pages are plain HTML so they read fine without JavaScript (Paddle's reviewers, search
 // engines); only buy.html and thanks.html need scripts.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+// The real site goes to site/ (deployed to Cloudflare as https://totefile.com). The repo root
+// is still served by GitHub Pages at sergfront.github.io/privacy/: there every page is a stub
+// that forwards to the same path on totefile.com, keeping ?query (checkout and key links).
+const OUT = join(root, 'site');
+const DOMAIN = 'https://totefile.com';
+rmSync(OUT, { recursive: true, force: true });
+mkdirSync(OUT, { recursive: true });
+cpSync(join(root, 'assets'), join(OUT, 'assets'), { recursive: true });
 const sandbox = { window: {} };
 vm.runInNewContext(readFileSync(join(root, 'assets/config.js'), 'utf8'), sandbox);
 const SHOP = sandbox.window.SHOP;
@@ -26,19 +34,24 @@ function page({ file, title, description, body, scripts = '', wide = false }) {
 </head>
 <body>
 <header class="site"><div class="wrap">
-  <a class="brand" href="./"><span class="mark">⇩</span>${esc(SHOP.seller)}</a>
+  <a class="brand" href="./"><span class="mark">⇩</span>${esc(SHOP.brand)}</a>
   <nav><a href="./#products">Products</a><a href="./#pricing">Pricing</a><a href="./#faq">FAQ</a><a href="./#support">Support</a></nav>
 </div></header>
 <main>${wide ? body : `<div class="wrap">${body}</div>`}</main>
 <footer><div class="wrap">
   <a href="./">Home</a><a href="terms.html">Terms of Service</a><a href="refund.html">Refund Policy</a><a href="PRIVACY.html">Privacy Policy</a><a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a>
-  <p>© 2026 ${esc(SHOP.seller)}. Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders.</p>
+  <p>© 2026 ${esc(SHOP.brand)} is a product of ${esc(SHOP.seller)}. Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders.</p>
 </div></footer>
 ${scripts}
 </body>
 </html>
 `;
-  writeFileSync(join(root, file), html);
+  writeFileSync(join(OUT, file), html);
+  const to = `${DOMAIN}/${file === 'index.html' ? '' : file}`;
+  writeFileSync(
+    join(root, file),
+    `<!doctype html><meta charset="utf-8"><title>${esc(title)}</title><link rel="canonical" href="${to}"><meta http-equiv="refresh" content="0; url=${to}"><script>location.replace(${JSON.stringify(to)} + location.search + location.hash)</script><p>Moved to <a href="${to}">${to}</a>.</p>\n`,
+  );
 }
 
 // ---------------------------------------------------------------- home
@@ -107,7 +120,7 @@ const compareRows = Object.entries(SHOP.products)
 
 page({
   file: 'index.html',
-  title: `${SHOP.seller} — export your Amazon invoices, Kindle highlights and Trello boards`,
+  title: `${SHOP.brand} — export your Amazon invoices, Kindle highlights and Trello boards`,
   description: 'Browser extensions for Chrome, Edge and Firefox that export your Amazon invoices, Kindle highlights and Trello boards in one click. Private: your data never leaves your browser.',
   body: `
 <section class="hero"><div class="wrap">
@@ -226,12 +239,12 @@ page({
 page({
   file: 'terms.html',
   title: 'Terms of Service',
-  description: `Terms of Service for ${SHOP.seller} browser extensions.`,
+  description: `Terms of Service for ${SHOP.brand} browser extensions.`,
   body: `
 <div class="doc">
 <h1>Terms of Service</h1>
 <p class="note">Last updated: ${UPDATED}</p>
-<p>These terms cover the browser extensions Invoice Downloader for Amazon, Highlights Exporter for Kindle and Board Exporter for Trello (the "extensions") and the Pro licenses for them, offered by ${esc(SHOP.seller)}, an individual software developer based in Ukraine ("we", "us").</p>
+<p>These terms cover the browser extensions Invoice Downloader for Amazon, Highlights Exporter for Kindle and Board Exporter for Trello (the "extensions") and the Pro licenses for them, offered under the brand ${esc(SHOP.brand)} by ${esc(SHOP.seller)}, an individual software developer based in Ukraine ("we", "us").</p>
 
 <h2>Orders and payment</h2>
 <p>Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns. Paddle's <a href="https://www.paddle.com/legal/checkout-buyer-terms">Buyer Terms</a> apply to your purchase.</p>
@@ -266,7 +279,7 @@ page({
 page({
   file: 'refund.html',
   title: 'Refund Policy',
-  description: `Refund policy for ${SHOP.seller} Pro licenses.`,
+  description: `Refund policy for ${SHOP.brand} Pro licenses.`,
   body: `
 <div class="doc">
 <h1>Refund Policy</h1>

@@ -1,0 +1,17 @@
+# Cloudflare Worker that serves the shop at https://totefile.com (static files from site/).
+# Build first: node tools/build.mjs; deploy: npx wrangler deploy (needs CLOUDFLARE_API_TOKEN).
+name = "totefile-site"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+routes = [
+  { pattern = "totefile.com", custom_domain = true },
+  { pattern = "www.totefile.com", custom_domain = true },
+]
+
+[assets]
+directory = "./site"
+binding = "ASSETS"
+run_worker_first = true
+html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"
