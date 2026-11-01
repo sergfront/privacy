@@ -12,10 +12,31 @@
   document.getElementById('title').textContent = product.name + ' — Pro';
   document.title = product.name + ' — Checkout';
 
+  // Anonymous count of Buy clicks (product + plan only), so we know which Pro people want.
+  if (q.get('test') !== '1') {
+    fetch(S.licenseApi + '/v1/interest', { method: 'POST', body: new URLSearchParams({ niche: id, plan: plan }) }).catch(function () {});
+  }
+
   if (!S.salesOpen && q.get('test') !== '1') {
-    var mail = 'mailto:' + S.supportEmail + '?subject=' + encodeURIComponent('Notify me: ' + product.name + ' Pro');
-    status.innerHTML = 'Pro is launching in a few days. The free version already works — install it and use it today.<br><br>' +
-      '<a class="btn primary" href="' + mail + '">Email me when Pro is available</a> <a class="btn" href="./#' + id + '">Back</a>';
+    status.innerHTML =
+      'Pro is launching soon. The free version already works — install it and use it today.' +
+      '<form id="wl" class="waitlist"><label for="wl-email">Get one email when ' + product.name + ' Pro is available:</label>' +
+      '<div class="wl-row"><input id="wl-email" type="email" required placeholder="you@example.com" autocomplete="email">' +
+      '<button class="btn primary" type="submit">Notify me</button></div>' +
+      '<p class="note">We only use your email for this one message. <a href="PRIVACY.html">Privacy</a></p></form>' +
+      '<p><a class="btn" href="./#' + id + '">Back</a></p>';
+    document.getElementById('wl').onsubmit = function (e) {
+      e.preventDefault();
+      var email = document.getElementById('wl-email').value;
+      fetch(S.licenseApi + '/v1/waitlist', { method: 'POST', body: new URLSearchParams({ email: email, niche: id }) })
+        .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, b: b }; }); })
+        .then(function (r) {
+          document.getElementById('wl').innerHTML = r.ok
+            ? '<p><strong>Thanks!</strong> We will email ' + email.replace(/[<>&"]/g, '') + ' once ' + product.name + ' Pro is available.</p>'
+            : '<p>' + (r.b.error || 'Something went wrong.') + '</p>';
+        })
+        .catch(function () { document.getElementById('wl').innerHTML = '<p>Network error — please try again or email ' + S.supportEmail + '.</p>'; });
+    };
     return;
   }
 
