@@ -1,6 +1,8 @@
 // Checkout through the monobank jar (payments: 'mono' in config.js).
 // 1) POST /v1/mono/order → code + exact UAH amount + jar link; 2) the buyer pays on monobank's
 // page; 3) we poll /v1/claim until the bank's webhook marks the order paid, then go to thanks.html.
+// Or USDT: POST /v1/crypto/order → the buyer sends USDT to one of S.cryptoWallets and pastes the
+// transaction hash → POST /v1/crypto/verify checks it on the chain → thanks.html.
 // The order sits in the URL, so a reload (or coming back later) picks it up again.
 (function () {
   var S = window.SHOP;
@@ -17,6 +19,7 @@
   document.getElementById('title').textContent = product.name + ' — Pro';
   document.title = product.name + ' — Checkout';
 
+  if (q.get('order') && q.get('method') === 'crypto') return showCrypto({ txn: q.get('order'), code: q.get('code') }, q.get('chain'));
   if (q.get('order')) return showOrder({ txn: q.get('order'), code: q.get('code'), amount_uah: q.get('uah'), jar_url: q.get('jar'), usd: product.lifetime.price });
 
   if (q.get('test') !== '1') {
@@ -28,18 +31,29 @@
     '<p><strong>$' + product.lifetime.price + ' one-time</strong> · lifetime license · up to 3 devices · 14-day money-back.</p>' +
     '<form id="start" class="waitlist"><label for="email">Your email <span class="note">(optional — only to resend your key if you lose it)</span></label>' +
     '<div class="wl-row"><input id="email" type="email" placeholder="you@example.com" autocomplete="email">' +
-    '<button class="btn primary" type="submit">Continue to payment</button></div></form>';
+    '</div><p class="paywith"><button class="btn primary" type="submit" value="card">Pay by card</button>' +
+    (S.cryptoWallets ? ' <button class="btn" type="submit" value="crypto">Pay with USDT (crypto)</button>' : '') + '</p></form>';
 
   document.getElementById('start').onsubmit = function (e) {
     e.preventDefault();
-    var btn = e.target.querySelector('button');
-    btn.disabled = true;
+    var btn = e.submitter || e.target.querySelector('button');
+    var label = btn.textContent;
+    Array.prototype.forEach.call(e.target.querySelectorAll('button'), function (b) { b.disabled = true; });
     btn.textContent = 'One moment…';
-    fetch(S.licenseApi + '/v1/mono/order', { method: 'POST', body: new URLSearchParams({ niche: id, email: document.getElementById('email').value }) })
+    var crypto = btn.value === 'crypto';
+    fetch(S.licenseApi + (crypto ? '/v1/crypto/order' : '/v1/mono/order'), { method: 'POST', body: new URLSearchParams({ niche: id, email: document.getElementById('email').value }) })
       .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, b: b }; }); })
       .then(function (r) {
         if (!r.ok) throw new Error(r.b.error || 'error');
         var u = new URL(location.href);
+        if (crypto) {
+          u.searchParams.set('order', r.b.txn);
+          u.searchParams.set('code', r.b.code);
+          u.searchParams.set('method', 'crypto');
+          u.searchParams.delete('plan');
+          history.replaceState(null, '', u.toString());
+          return showCrypto(r.b);
+        }
         u.searchParams.set('order', r.b.txn);
         u.searchParams.set('code', r.b.code);
         u.searchParams.set('uah', r.b.amount_uah);
@@ -49,8 +63,8 @@
         showOrder(r.b);
       })
       .catch(function (err) {
-        btn.disabled = false;
-        btn.textContent = 'Continue to payment';
+        Array.prototype.forEach.call(e.target.querySelectorAll('button'), function (b) { b.disabled = false; });
+        btn.textContent = label;
         status.insertAdjacentHTML('beforeend', '<p>Could not start the payment (' + esc(err.message) + '). Try again or email ' + mail + '.</p>');
       });
   };
@@ -76,12 +90,79 @@
       '</ol>' +
       '<p id="wait" class="lead">Waiting for your payment… keep this page open — your license key appears here automatically, usually within a minute.</p>' +
       '<p class="note">Order <code>' + esc(o.code) + '</code>. Closed the page? Bookmark it or come back with the same link. Problems? Email ' + mail + ' with your order code.</p>';
+    copyButtons();
+    poll(o.txn, 0);
+  }
+
+  function copyButtons() {
     Array.prototype.forEach.call(status.querySelectorAll('[data-copy]'), function (b) {
       b.onclick = function () {
         navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function () { b.textContent = 'Copied'; });
       };
     });
-    poll(o.txn, 0);
+  }
+
+  function showCrypto(o, chain) {
+    var W = S.cryptoWallets;
+    var usdt = product.lifetime.price;
+    chain = W[chain] ? chain : Object.keys(W)[0];
+    var tabs = Object.keys(W).map(function (c) {
+      return '<label class="net"><input type="radio" name="net" value="' + c + '"' + (c === chain ? ' checked' : '') + '> ' + esc(W[c].label) + '</label>';
+    }).join('');
+    status.innerHTML =
+      '<ol class="paysteps">' +
+      '<li><span>Send at least</span><div class="key">' + usdt + ' USDT</div>' +
+      '<p class="note">Only USDT (Tether). Network and exchange fees are on your side — make sure at least ' + usdt + ' USDT arrives. Withdrawing from an exchange? Check the "receive amount".</p></li>' +
+      '<li><span>Pick the network and copy the address</span><div class="nets">' + tabs + '</div>' +
+      '<div class="key" id="addr"></div><button class="btn" type="button" id="copy-addr">Copy address</button>' +
+      '<p class="note">Send on the network you picked only — a different network loses the money.</p></li>' +
+      '<li><span>Paste the transaction hash</span>' +
+      '<form id="verify" class="waitlist"><label for="hash">Transaction hash, or the link from the explorer (Tronscan, BscScan, Solscan, Tonviewer)</label>' +
+      '<div class="wl-row"><input id="hash" required placeholder="e.g. 9883b993… or https://tronscan.org/#/transaction/…" autocomplete="off">' +
+      '<button class="btn primary" type="submit">Check payment</button></div></form>' +
+      '<p id="wait" class="lead"></p></li>' +
+      '</ol>' +
+      '<p class="note">Order <code>' + esc(o.code) + '</code>. Closed the page? Come back with the same link. Problems? Email ' + mail + ' with your order code and the transaction hash.</p>';
+    function current() { return status.querySelector('input[name=net]:checked').value; }
+    function showAddr() {
+      var c = current();
+      document.getElementById('addr').textContent = W[c].address;
+      document.getElementById('copy-addr').textContent = 'Copy address';
+      document.getElementById('copy-addr').onclick = function () {
+        var b = this;
+        navigator.clipboard.writeText(W[c].address).then(function () { b.textContent = 'Copied'; });
+      };
+      var u = new URL(location.href);
+      u.searchParams.set('chain', c);
+      history.replaceState(null, '', u.toString());
+    }
+    Array.prototype.forEach.call(status.querySelectorAll('input[name=net]'), function (r) { r.onchange = showAddr; });
+    showAddr();
+    var timer = null;
+    document.getElementById('verify').onsubmit = function (e) {
+      e.preventDefault();
+      clearTimeout(timer);
+      check(current(), document.getElementById('hash').value, 0);
+    };
+    function check(c, hash, tries) {
+      var wait = document.getElementById('wait');
+      wait.textContent = 'Checking the payment on the network…';
+      fetch(S.licenseApi + '/v1/crypto/verify', { method: 'POST', body: new URLSearchParams({ txn: o.txn, chain: c, hash: hash }) })
+        .then(function (r) { return r.json().then(function (b) { return { status: r.status, b: b }; }); })
+        .then(function (r) {
+          if (r.status === 200) {
+            location.href = 'thanks.html?txn=' + encodeURIComponent(o.txn) + '&p=' + encodeURIComponent(id);
+            return;
+          }
+          wait.textContent = r.b.error || 'Something went wrong.';
+          // Not on the chain / not confirmed yet: keep checking every 15 s for ~20 minutes.
+          if (r.b.pending && tries < 80) timer = setTimeout(function () { check(c, hash, tries + 1); }, 15000);
+        })
+        .catch(function () {
+          wait.textContent = 'Network error — we will try again.';
+          if (tries < 80) timer = setTimeout(function () { check(c, hash, tries + 1); }, 15000);
+        });
+    }
   }
 
   function poll(txn, tries) {

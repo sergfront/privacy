@@ -16,6 +16,13 @@ window.SHOP = {
   brand: 'Totefile',
   // Legal seller (Paddle account name); shown as "Totefile is a product of …".
   seller: 'Serhii Solutions',
+  // Own USDT wallets for "Pay with USDT" (must match WALLETS in license-server/src/crypto.ts).
+  cryptoWallets: {
+    tron: { label: 'TRON (TRC20)', address: 'TVaCJT9pyoFzzNAac6pvPYx92zt9krK6yK' },
+    bsc: { label: 'BNB Smart Chain (BEP20)', address: '0xe67CDEaB4De8151ab2E33cF096d5ae1b99A2AB50' },
+    solana: { label: 'Solana', address: '7bC4NgH8diEodQ1TrHjYufF1sTBYxh98FAvsfBVwrQaN' },
+    ton: { label: 'TON', address: 'UQArUdyzsOl6WT_jPYVOkis4n78UdmotNa2hQNoz20KlbJLI' },
+  },
   products: {
     'amazon-invoices': {
       name: 'Invoice Downloader for Amazon',

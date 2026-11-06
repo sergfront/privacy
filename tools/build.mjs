@@ -23,7 +23,7 @@ const UPDATED = '2026-11-06';
 // 'mono' = monobank jar (lifetime only), 'paddle' = Paddle as Merchant of Record.
 const MONO = SHOP.payments === 'mono';
 const PAYMENT_LINE = MONO
-  ? 'Card payments are taken on the secure page of monobank (Universal Bank, Ukraine).'
+  ? 'Card payments are taken on the secure page of monobank (Universal Bank, Ukraine); USDT payments go to our own wallets.'
   : 'Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders.';
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
@@ -186,7 +186,7 @@ page({
   <details><summary>Do I need to create an account?</summary><p>No. Install the extension and use it. For Pro you only paste the license key you get after paying.</p></details>
   ${MONO
     ? `<details><summary>Is there a subscription?</summary><p>No. Pro is a one-time payment and includes future updates. Nothing renews and you are never charged again.</p></details>
-  <details><summary>How do I pay?</summary><p>Click "Get Pro", and you get an amount and an order code. Pay on monobank's secure page with any Visa or Mastercard, Apple Pay or Google Pay, with the code in the comment. Your license key appears on our page within a minute.</p></details>`
+  <details><summary>How do I pay?</summary><p>Click "Get Pro", and you get an amount and an order code. Pay on monobank's secure page with any Visa or Mastercard, Apple Pay or Google Pay, with the code in the comment. Your license key appears on our page within a minute. Prefer crypto? Pick "Pay with USDT", send USDT on TRON, BNB Smart Chain, Solana or TON and paste the transaction hash — the key appears as soon as the transfer is confirmed.</p></details>`
     : `<details><summary>Lifetime or monthly — what's the difference?</summary><p>Lifetime is a one-time payment and includes future updates. Monthly renews each month and can be cancelled any time from the link in your Paddle receipt; Pro stays active until the end of the paid month.</p></details>`}
   <details><summary>Can I get a refund?</summary><p>Yes — full refund within 14 days, no questions asked. See the <a href="refund.html">Refund Policy</a>.</p></details>
   <details><summary>I lost my license key.</summary><p>Email <a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a> from the address you paid with and we'll send it again.</p></details>
@@ -268,7 +268,7 @@ page({
 
 <h2>Orders and payment</h2>
 ${MONO
-  ? `<p>Pro licenses are sold by us directly. Prices are shown in US dollars; you pay the equivalent in Ukrainian hryvnias (UAH), at the official exchange rate of the day, by card on the secure payment page of monobank (Universal Bank, Ukraine). Your bank may convert the amount to your currency and may charge its own fees. We never see your card details. Your license key is shown on our website as soon as the bank confirms the payment.</p>`
+  ? `<p>Pro licenses are sold by us directly. Prices are shown in US dollars; you pay the equivalent in Ukrainian hryvnias (UAH), at the official exchange rate of the day, by card on the secure payment page of monobank (Universal Bank, Ukraine). Your bank may convert the amount to your currency and may charge its own fees. We never see your card details. You can also pay in USDT (Tether) on TRON, BNB Smart Chain, Solana or TON to the wallet addresses shown at checkout; network and exchange fees are yours. Your license key is shown on our website as soon as the bank or the network confirms the payment.</p>`
   : `<p>Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns. Paddle's <a href="https://www.paddle.com/legal/checkout-buyer-terms">Buyer Terms</a> apply to your purchase.</p>`}
 
 <h2>Licenses</h2>
@@ -309,7 +309,7 @@ page({
 ${MONO
   ? `<p><strong>14-day money-back guarantee.</strong> If a Pro license does not work for you, ask for a refund within 14 days of the payment and you get the full amount back — no questions asked.</p>
 <h2>How to ask</h2>
-<p>Email <a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a> with your order code (TF-…). We reply within one business day and agree with you how to send the money back — usually to your card. We return the full amount we received; currency conversion by your bank is outside our control.</p>`
+<p>Email <a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a> with your order code (TF-…). We reply within one business day and agree with you how to send the money back — usually to your card. We return the full amount we received; currency conversion by your bank is outside our control. USDT payments are refunded in USDT to an address you give us, on the same network.</p>`
   : `<p><strong>14-day money-back guarantee.</strong> If a Pro license does not work for you, ask for a refund within 14 days of the payment and you get the full amount back — no questions asked. This applies to lifetime licenses and to each monthly payment.</p>
 <h2>How to ask</h2>
 <ul>
@@ -331,7 +331,7 @@ const privacyBody = readFileSync(join(root, 'tools/privacy.html'), 'utf8')
   .replaceAll(
     '{{PURCHASES}}',
     MONO
-      ? '<p>Card payments are taken on the secure page of monobank (Universal Bank, Ukraine), which processes your card details under its own privacy policy. We never see your card number. For each order our server keeps the product, the amount, the order code, the date and, only if you enter it, your email (to resend a lost key). From the bank we receive the amount, the time and the comment of the payment, and the payer name the bank shows, to match the payment to your order and for our records.</p>'
+      ? '<p>Card payments are taken on the secure page of monobank (Universal Bank, Ukraine), which processes your card details under its own privacy policy. We never see your card number. For each order our server keeps the product, the amount, the order code, the date and, only if you enter it, your email (to resend a lost key). From the bank we receive the amount, the time and the comment of the payment, and the payer name the bank shows, to match the payment to your order and for our records. If you pay in USDT, we keep the network, the transaction hash and the amount; blockchain transfers are public by nature.</p>'
       : '<p>Purchases are handled by Paddle.com, our Merchant of Record, on its secure checkout. Paddle collects your name, email, country and payment details and processes them under its <a href="https://www.paddle.com/legal/privacy">privacy policy</a>. We receive from Paddle the order details (product, price, date, email and country) to provide your license and support. We never see your card number.</p>',
   )
   .replaceAll('{{CHECKOUT_SCRIPT}}', MONO ? '' : " The checkout page loads Paddle's script to open the payment form.")
