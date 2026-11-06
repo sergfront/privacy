@@ -3,9 +3,9 @@
 window.SHOP = {
   // "sandbox" while testing; switch to "live" with the live token and live price IDs.
   env: 'sandbox',
-  // false until Paddle approves the live account: buy.html then says Pro is coming soon
+  // true: buy.html sells (monobank jar). false: buy.html says Pro is coming soon
   // instead of opening checkout (add ?test=1 to open the sandbox checkout for testing).
-  salesOpen: false,
+  salesOpen: true,
   // How Pro is paid for: 'mono' = monobank jar (lifetime only, key appears after the bank's
   // webhook), 'paddle' = Paddle checkout (needs a verified live account).
   payments: 'mono',
