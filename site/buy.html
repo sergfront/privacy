@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout</title>
+<meta name="description" content="Buy a Pro license.">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta property="og:image" content="https://totefile.com/assets/icon-512.png">
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <a class="brand" href="./"><img class="logo" src="assets/logo.svg" alt="" width="30" height="30">Totefile</a>
+  <nav><a href="./#products">Products</a><a href="./#pricing">Pricing</a><a href="./#faq">FAQ</a><a href="./#support">Support</a></nav>
+</div></header>
+<main><div class="wrap">
+<div class="doc">
+<h1 id="title">Checkout</h1>
+<p id="status" class="lead">Opening the secure checkout…</p>
+
+<noscript><p>The checkout needs JavaScript.</p></noscript>
+</div></div></main>
+<footer><div class="wrap">
+  <a href="./">Home</a><a href="terms.html">Terms of Service</a><a href="refund.html">Refund Policy</a><a href="PRIVACY.html">Privacy Policy</a><a href="mailto:sergefrontend@gmail.com">sergefrontend@gmail.com</a>
+  <p>© 2026 Totefile is a product of Serhii Solutions. Card payments are taken on the secure page of monobank (Universal Bank, Ukraine); USDT payments go to our own wallets.</p>
+</div></footer>
+<script src="assets/config.js"></script>
+<script>(function () {
+  // While sales are closed buy.js shows the waitlist; ?test=1 opens the jar checkout anyway.
+  var s = document.createElement('script');
+  s.src = !window.SHOP.salesOpen && new URLSearchParams(location.search).get('test') !== '1' ? 'assets/buy.js' : 'assets/buy-mono.js';
+  document.body.appendChild(s);
+})();</script>
+</body>
+</html>
