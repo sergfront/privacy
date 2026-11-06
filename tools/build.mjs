@@ -18,8 +18,13 @@ cpSync(join(root, 'assets'), join(OUT, 'assets'), { recursive: true });
 const sandbox = { window: {} };
 vm.runInNewContext(readFileSync(join(root, 'assets/config.js'), 'utf8'), sandbox);
 const SHOP = sandbox.window.SHOP;
-const UPDATED = '2026-10-31';
+const UPDATED = '2026-11-06';
 
+// 'mono' = monobank jar (lifetime only), 'paddle' = Paddle as Merchant of Record.
+const MONO = SHOP.payments === 'mono';
+const PAYMENT_LINE = MONO
+  ? 'Card payments are taken on the secure page of monobank (Universal Bank, Ukraine).'
+  : 'Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders.';
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 function page({ file, title, description, body, scripts = '', wide = false }) {
@@ -44,7 +49,7 @@ function page({ file, title, description, body, scripts = '', wide = false }) {
 <main>${wide ? body : `<div class="wrap">${body}</div>`}</main>
 <footer><div class="wrap">
   <a href="./">Home</a><a href="terms.html">Terms of Service</a><a href="refund.html">Refund Policy</a><a href="PRIVACY.html">Privacy Policy</a><a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a>
-  <p>© 2026 ${esc(SHOP.brand)} is a product of ${esc(SHOP.seller)}. Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders.</p>
+  <p>© 2026 ${esc(SHOP.brand)} is a product of ${esc(SHOP.seller)}. ${PAYMENT_LINE}</p>
 </div></footer>
 ${scripts}
 </body>
@@ -107,10 +112,10 @@ const productBlocks = Object.entries(SHOP.products)
     <div class="head"><img src="assets/img/${id}.png" alt="" width="52" height="52"><div><div class="for">${SITES[id] ?? ''}</div><h3>${esc(p.name)}</h3></div></div>
     <p class="tagline">${esc(p.tagline)}</p>
     <ul class="ticks">${p.pro.map((x) => `<li>${esc(x)}</li>`).join('')}<li>Up to 3 of your devices</li></ul>
-    <div class="price-row"><span class="big">$${p.lifetime.price}</span><span class="sub">one-time, yours forever · or $${p.monthly.price}/month</span></div>
+    <div class="price-row"><span class="big">$${p.lifetime.price}</span><span class="sub">one-time, yours forever${MONO ? '' : ` · or $${p.monthly.price}/month`}</span></div>
     <div class="cta">
       <a class="btn primary" href="buy.html?p=${id}&amp;plan=lifetime">Get Pro — $${p.lifetime.price}</a>
-      <a class="btn" href="buy.html?p=${id}&amp;plan=monthly">Monthly — $${p.monthly.price}</a>
+      ${MONO ? '' : `<a class="btn" href="buy.html?p=${id}&amp;plan=monthly">Monthly — $${p.monthly.price}</a>`}
     </div>
     <p class="free-note"><strong>Free plan:</strong> ${p.free.map(esc).join(' · ')}.</p>
   </div>
@@ -119,7 +124,7 @@ const productBlocks = Object.entries(SHOP.products)
   .join('\n');
 
 const compareRows = Object.entries(SHOP.products)
-  .map(([, p]) => `<tr><td><strong>${esc(p.name)}</strong></td><td>${esc(p.free.join(', '))}</td><td><span class="yes">Unlimited</span></td><td>$${p.monthly.price}/mo</td><td>$${p.lifetime.price}</td></tr>`)
+  .map(([, p]) => `<tr><td><strong>${esc(p.name)}</strong></td><td>${esc(p.free.join(', '))}</td><td><span class="yes">Unlimited</span></td>${MONO ? '' : `<td>$${p.monthly.price}/mo</td>`}<td>$${p.lifetime.price}</td></tr>`)
   .join('');
 
 page({
@@ -167,19 +172,22 @@ page({
 </section>
 
 <section class="section" id="pricing">
-  <div class="section-head"><span class="eyebrow">Pricing</span><h2>Free to start. Pay once if it helps.</h2><p>Every extension is free with a daily limit. Pro is sold per extension: one-time lifetime license or monthly. Prices in USD; VAT or sales tax is added at checkout where it applies.</p></div>
+  <div class="section-head"><span class="eyebrow">Pricing</span><h2>Free to start. Pay once if it helps.</h2><p>Every extension is free with a daily limit. ${MONO ? 'Pro is sold per extension as a one-time lifetime license. Prices in USD; you pay the same amount in UAH by card and your bank converts it.' : 'Pro is sold per extension: one-time lifetime license or monthly. Prices in USD; VAT or sales tax is added at checkout where it applies.'}</p></div>
   <div class="table-scroll"><table class="compare">
-    <tr><th>Extension</th><th>Free</th><th>Pro</th><th>Monthly</th><th>Lifetime</th></tr>
+    <tr><th>Extension</th><th>Free</th><th>Pro</th>${MONO ? '' : '<th>Monthly</th>'}<th>Lifetime</th></tr>
     ${compareRows}
   </table></div>
-  <p class="note">After paying you get a license key on screen: open the extension → Settings → paste → Activate. One key works on up to 3 of your devices, in Chrome, Edge and Firefox. Payments are processed by Paddle.com, our Merchant of Record.</p>
+  <p class="note">After paying you get a license key on screen: open the extension → Settings → paste → Activate. One key works on up to 3 of your devices, in Chrome, Edge and Firefox. ${MONO ? 'Payments are taken by card on the secure page of monobank, a Ukrainian bank; we never see your card details.' : 'Payments are processed by Paddle.com, our Merchant of Record.'}</p>
 </section>
 
 <section class="section" id="faq">
   <div class="section-head"><span class="eyebrow">FAQ</span><h2>Questions</h2></div>
   <details><summary>Which Amazon stores are supported?</summary><p>All Amazon marketplaces that have the "Your Orders" page — .com, .co.uk, .de, .fr, .it, .es, .pl, .nl, .se, .ca, .com.au and others. PDF invoices are saved where Amazon issues them; for other orders you get the order summary.</p></details>
   <details><summary>Do I need to create an account?</summary><p>No. Install the extension and use it. For Pro you only paste the license key you get after paying.</p></details>
-  <details><summary>Lifetime or monthly — what's the difference?</summary><p>Lifetime is a one-time payment and includes future updates. Monthly renews each month and can be cancelled any time from the link in your Paddle receipt; Pro stays active until the end of the paid month.</p></details>
+  ${MONO
+    ? `<details><summary>Is there a subscription?</summary><p>No. Pro is a one-time payment and includes future updates. Nothing renews and you are never charged again.</p></details>
+  <details><summary>How do I pay?</summary><p>Click "Get Pro", and you get an amount and an order code. Pay on monobank's secure page with any Visa or Mastercard, Apple Pay or Google Pay, with the code in the comment. Your license key appears on our page within a minute.</p></details>`
+    : `<details><summary>Lifetime or monthly — what's the difference?</summary><p>Lifetime is a one-time payment and includes future updates. Monthly renews each month and can be cancelled any time from the link in your Paddle receipt; Pro stays active until the end of the paid month.</p></details>`}
   <details><summary>Can I get a refund?</summary><p>Yes — full refund within 14 days, no questions asked. See the <a href="refund.html">Refund Policy</a>.</p></details>
   <details><summary>I lost my license key.</summary><p>Email <a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a> from the address you paid with and we'll send it again.</p></details>
   <details><summary>A site changed and the extension stopped working.</summary><p>It happens — Amazon, Kindle and Trello redesign their pages. Click "Report a problem" in the extension and email us the file; we usually fix it within days.</p></details>
@@ -206,10 +214,18 @@ page({
 <div class="doc">
 <h1 id="title">Checkout</h1>
 <p id="status" class="lead">Opening the secure checkout…</p>
-<p class="note">Payments are processed by Paddle.com, our Merchant of Record. If the checkout does not open, <a href="./">go back</a> and try again, or email <a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a>.</p>
+${MONO ? '' : `<p class="note">Payments are processed by Paddle.com, our Merchant of Record. If the checkout does not open, <a href="./">go back</a> and try again, or email <a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a>.</p>`}
 <noscript><p>The checkout needs JavaScript.</p></noscript>
 </div>`,
-  scripts: `<script src="assets/config.js"></script>
+  scripts: MONO
+    ? `<script src="assets/config.js"></script>
+<script>(function () {
+  // While sales are closed buy.js shows the waitlist; ?test=1 opens the jar checkout anyway.
+  var s = document.createElement('script');
+  s.src = !window.SHOP.salesOpen && new URLSearchParams(location.search).get('test') !== '1' ? 'assets/buy.js' : 'assets/buy-mono.js';
+  document.body.appendChild(s);
+})();</script>`
+    : `<script src="assets/config.js"></script>
 <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <script src="assets/buy.js"></script>`,
 });
@@ -231,7 +247,7 @@ page({
     <li>Click the extension's icon in the browser toolbar → <strong>Settings</strong>.</li>
     <li>Paste the key and click <strong>Activate</strong>.</li>
   </ol>
-  <p class="note"><strong>Save this key</strong> (for example in your password manager). It works on up to 3 devices. Lost it? Email <a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a> from the address you paid with. Your receipt comes from Paddle.</p>
+  <p class="note"><strong>Save this key</strong> (for example in your password manager). It works on up to 3 devices. Lost it? Email <a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a> ${MONO ? 'with your order code (or the email you gave).' : 'from the address you paid with. Your receipt comes from Paddle.'}</p>
 </div>
 </div>`,
   scripts: `<script src="assets/config.js"></script>
@@ -251,13 +267,15 @@ page({
 <p>These terms cover the browser extensions Invoice Downloader for Amazon, Highlights Exporter for Kindle and Board Exporter for Trello (the "extensions") and the Pro licenses for them, offered under the brand ${esc(SHOP.brand)} by ${esc(SHOP.seller)}, an individual software developer based in Ukraine ("we", "us").</p>
 
 <h2>Orders and payment</h2>
-<p>Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns. Paddle's <a href="https://www.paddle.com/legal/checkout-buyer-terms">Buyer Terms</a> apply to your purchase.</p>
+${MONO
+  ? `<p>Pro licenses are sold by us directly. Prices are shown in US dollars; you pay the equivalent in Ukrainian hryvnias (UAH), at the official exchange rate of the day, by card on the secure payment page of monobank (Universal Bank, Ukraine). Your bank may convert the amount to your currency and may charge its own fees. We never see your card details. Your license key is shown on our website as soon as the bank confirms the payment.</p>`
+  : `<p>Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns. Paddle's <a href="https://www.paddle.com/legal/checkout-buyer-terms">Buyer Terms</a> apply to your purchase.</p>`}
 
 <h2>Licenses</h2>
 <ul>
   <li>The extensions are free to install and use within the free plan's limits.</li>
   <li>A Pro license is sold for one extension. It is personal: you may use it on up to 3 of your own devices. Do not share or resell keys.</li>
-  <li><strong>Monthly</strong> licenses renew every month until you cancel. You can cancel at any time from the link in your Paddle receipt; Pro stays active until the end of the paid month.</li>
+  ${MONO ? '' : `<li><strong>Monthly</strong> licenses renew every month until you cancel. You can cancel at any time from the link in your Paddle receipt; Pro stays active until the end of the paid month.</li>`}
   <li><strong>Lifetime</strong> licenses are a one-time payment and stay valid for as long as we offer the extension, including its updates.</li>
   <li>The extension checks your license with our license server once a day. If the check cannot run (for example, you are offline), Pro keeps working for up to 7 days.</li>
 </ul>
@@ -288,24 +306,36 @@ page({
 <div class="doc">
 <h1>Refund Policy</h1>
 <p class="note">Last updated: ${UPDATED}</p>
-<p><strong>14-day money-back guarantee.</strong> If a Pro license does not work for you, ask for a refund within 14 days of the payment and you get the full amount back — no questions asked. This applies to lifetime licenses and to each monthly payment.</p>
+${MONO
+  ? `<p><strong>14-day money-back guarantee.</strong> If a Pro license does not work for you, ask for a refund within 14 days of the payment and you get the full amount back — no questions asked.</p>
+<h2>How to ask</h2>
+<p>Email <a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a> with your order code (TF-…). We reply within one business day and agree with you how to send the money back — usually to your card. We return the full amount we received; currency conversion by your bank is outside our control.</p>`
+  : `<p><strong>14-day money-back guarantee.</strong> If a Pro license does not work for you, ask for a refund within 14 days of the payment and you get the full amount back — no questions asked. This applies to lifetime licenses and to each monthly payment.</p>
 <h2>How to ask</h2>
 <ul>
   <li>Reply to your Paddle receipt or use <a href="https://paddle.net">paddle.net</a> to find your order and request a refund, or</li>
   <li>email <a href="mailto:${esc(SHOP.supportEmail)}">${esc(SHOP.supportEmail)}</a> from the address you paid with.</li>
 </ul>
-<p>Refunds are issued by Paddle.com, our Merchant of Record, to the original payment method. Banks usually show them within 5–10 business days.</p>
+<p>Refunds are issued by Paddle.com, our Merchant of Record, to the original payment method. Banks usually show them within 5–10 business days.</p>`}
 <h2>After a refund</h2>
 <p>The refunded license key stops unlocking Pro. The free plan keeps working.</p>
-<h2>Cancelling a subscription</h2>
-<p>Cancel a monthly license any time from the link in your Paddle receipt. You will not be charged again, and Pro stays active until the end of the month you paid for. Cancelling does not refund past payments unless they are within the 14 days above.</p>
+${MONO ? '' : `<h2>Cancelling a subscription</h2>
+<p>Cancel a monthly license any time from the link in your Paddle receipt. You will not be charged again, and Pro stays active until the end of the month you paid for. Cancelling does not refund past payments unless they are within the 14 days above.</p>`}
 </div>`,
 });
 
 // Privacy policy: the source of truth is PRIVACY.md in the extant repo; this is its HTML.
 const privacyBody = readFileSync(join(root, 'tools/privacy.html'), 'utf8')
   .replaceAll('{{SUPPORT_EMAIL}}', esc(SHOP.supportEmail))
-  .replaceAll('{{UPDATED}}', UPDATED);
+  .replaceAll('{{UPDATED}}', UPDATED)
+  .replaceAll(
+    '{{PURCHASES}}',
+    MONO
+      ? '<p>Card payments are taken on the secure page of monobank (Universal Bank, Ukraine), which processes your card details under its own privacy policy. We never see your card number. For each order our server keeps the product, the amount, the order code, the date and, only if you enter it, your email (to resend a lost key). From the bank we receive the amount, the time and the comment of the payment, and the payer name the bank shows, to match the payment to your order and for our records.</p>'
+      : '<p>Purchases are handled by Paddle.com, our Merchant of Record, on its secure checkout. Paddle collects your name, email, country and payment details and processes them under its <a href="https://www.paddle.com/legal/privacy">privacy policy</a>. We receive from Paddle the order details (product, price, date, email and country) to provide your license and support. We never see your card number.</p>',
+  )
+  .replaceAll('{{CHECKOUT_SCRIPT}}', MONO ? '' : " The checkout page loads Paddle's script to open the payment form.")
+  .replaceAll('{{ORDER_RECORDS}}', MONO ? 'Paid order records are kept as long as the license is valid and as required by law; unpaid orders are deleted after 3 days.' : 'Order records are kept by Paddle as required for tax law.');
 page({ file: 'PRIVACY.html', title: 'Privacy Policy', description: 'Privacy policy for our browser extensions and website.', body: `<div class="doc">${privacyBody}</div>` });
 
 console.log('built index, buy, thanks, terms, refund, PRIVACY');

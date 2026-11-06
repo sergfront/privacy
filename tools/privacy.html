@@ -21,13 +21,13 @@
 <p>If you click "Report a problem", the extension saves a file to your computer with the <em>structure</em> of the page (HTML tags and class names). Text, numbers, names, IDs and form values are removed. Nothing is sent automatically — you decide whether to email that file to us.</p>
 
 <h2>License checks</h2>
-<p>Only when you activate, check (once a day) or unlink a license, the extension sends the <strong>license key</strong>, the <strong>activation ID</strong> and the <strong>random device name</strong> to our license server (a Cloudflare Worker operated by us). The server asks Paddle whether the purchase behind the key is paid and not refunded, and stores, per license, the list of activated devices (activation ID, device name, date) to enforce the 3-device limit. We do not log IP addresses; Cloudflare processes network data to deliver the request under its <a href="https://www.cloudflare.com/privacypolicy/">privacy policy</a>. In Firefox, the extension asks for your permission before sending the license key.</p>
+<p>Only when you activate, check (once a day) or unlink a license, the extension sends the <strong>license key</strong>, the <strong>activation ID</strong> and the <strong>random device name</strong> to our license server (a Cloudflare Worker operated by us). The server checks that the purchase behind the key is paid and not refunded, and stores, per license, the list of activated devices (activation ID, device name, date) to enforce the 3-device limit. We do not log IP addresses; Cloudflare processes network data to deliver the request under its <a href="https://www.cloudflare.com/privacypolicy/">privacy policy</a>. In Firefox, the extension asks for your permission before sending the license key.</p>
 
 <h2>Purchases</h2>
-<p>Purchases are handled by Paddle.com, our Merchant of Record, on its secure checkout. Paddle collects your name, email, country and payment details and processes them under its <a href="https://www.paddle.com/legal/privacy">privacy policy</a>. We receive from Paddle the order details (product, price, date, email and country) to provide your license and support. We never see your card number.</p>
+{{PURCHASES}}
 
 <h2>This website</h2>
-<p>No analytics, cookies of our own or tracking. The checkout page loads Paddle's script to open the payment form.</p>
+<p>No analytics, cookies of our own or tracking.{{CHECKOUT_SCRIPT}}</p>
 <p>When you click a "Buy" button we count the click — only the product, the plan and the month, without your IP address or any identifier — so we know which Pro versions people want.</p>
 <p><strong>Pro waitlist.</strong> If you leave your email on the "Pro is launching soon" page, we store it with the product name, use it only to tell you once that Pro is available, and delete the list after that. To be removed earlier, email us.</p>
 
@@ -39,7 +39,7 @@
 </ul>
 
 <h2>Keeping and removing your data</h2>
-<p>Uninstalling the extension deletes everything it stored. To free a device slot first, open the extension's Settings and click <strong>Unlink this device</strong>, which also deletes that activation from our server. Order records are kept by Paddle as required for tax law. To ask us to delete the activation records for your license, email us.</p>
+<p>Uninstalling the extension deletes everything it stored. To free a device slot first, open the extension's Settings and click <strong>Unlink this device</strong>, which also deletes that activation from our server. {{ORDER_RECORDS}} To ask us to delete the activation records for your license, email us.</p>
 
 <h2>Contact</h2>
 <p><a href="mailto:{{SUPPORT_EMAIL}}">{{SUPPORT_EMAIL}}</a></p>

@@ -6,6 +6,9 @@ window.SHOP = {
   // false until Paddle approves the live account: buy.html then says Pro is coming soon
   // instead of opening checkout (add ?test=1 to open the sandbox checkout for testing).
   salesOpen: false,
+  // How Pro is paid for: 'mono' = monobank jar (lifetime only, key appears after the bank's
+  // webhook), 'paddle' = Paddle checkout (needs a verified live account).
+  payments: 'mono',
   clientToken: 'test_c8c209ac17d24180d9afb2dbf58',
   // License server (Cloudflare Worker, license-server/ in the extant repo).
   licenseApi: 'https://api.totefile.com',

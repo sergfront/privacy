@@ -10,6 +10,7 @@ This repo is the public shop site of **Totefile** — https://totefile.com — f
 - `tools/build.mjs` — generates every page into `site/` from the config. Also writes the GitHub Pages stubs in the repo root, which forward `sergfront.github.io/privacy/*` to `totefile.com/*`. Edit the generator, never the generated html.
 - `tools/privacy.html` — the privacy policy body. Keep it in sync with `PRIVACY.md` in `sergfront/extant`.
 - `assets/buy.js` — Paddle checkout. While `salesOpen` is false it shows the waitlist form; `?test=1` opens the sandbox checkout. It also counts Buy clicks.
+- `assets/buy-mono.js` — checkout through the monobank jar, used when `payments: 'mono'` in config.js (lifetime only): order code + UAH amount + jar link, then polls for the key. `?test=1` opens it while `salesOpen` is false. Details in extant's AGENTS.md ("Selling through a monobank jar").
 - `assets/thanks.js` — asks the license server for the key (`/v1/claim?txn=…`).
 - `worker.js` + `wrangler.toml` — the Cloudflare Worker `totefile-site`, which serves `site/` on totefile.com and redirects www to the apex.
 

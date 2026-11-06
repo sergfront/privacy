@@ -152,3 +152,5 @@ code { font-size: .9em; }
 .brand .logo { width: 30px; height: 30px; }
 .waitlist { margin: 20px 0; } .waitlist label { display: block; font-weight: 600; margin-bottom: 8px; }
 .wl-row { display: flex; gap: 10px; flex-wrap: wrap; } .wl-row input { flex: 1 1 240px; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 15px; }
+.paysteps { padding-left: 22px; } .paysteps li { margin: 0 0 22px; } .paysteps li > span { font-weight: 600; }
+.paysteps .key { margin: 8px 0; }
