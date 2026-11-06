@@ -65,7 +65,14 @@
       '<button class="btn" type="button" data-copy="' + esc(o.code) + '">Copy code</button></li>' +
       '<li><span>Pay by card on monobank\'s secure page</span>' +
       '<p><a class="btn primary" href="' + esc(o.jar_url) + '" target="_blank" rel="noopener">Open the payment page</a></p>' +
-      '<p class="note">monobank is a Ukrainian bank. Any Visa or Mastercard works, also Apple Pay and Google Pay. Enter the amount above and paste the code into the comment field. We never see your card details.</p></li>' +
+      '<p class="note">monobank is a Ukrainian bank. Any Visa or Mastercard works, also Apple Pay and Google Pay. We never see your card details.</p>' +
+      '<details class="guide" open><summary>The payment page is in Ukrainian — here is what it says</summary><table>' +
+      '<tr><td lang="uk">Сума поповнення</td><td>Amount — already filled in. Keep it as is.</td></tr>' +
+      '<tr><td lang="uk">Ім\'я або коментар</td><td>Comment — already contains your code ' + esc(o.code) + '. If it is empty, paste the code there.</td></tr>' +
+      '<tr><td lang="uk">Оплатити карткою</td><td>Pay by card — opens the card form. Or use Apple Pay / Google Pay.</td></tr>' +
+      '<tr><td lang="uk">Комісія 1,8% · Заплатити за одержувача?</td><td>monobank\'s 1.8% card fee. Ticking it is optional — your key works either way.</td></tr>' +
+      '<tr><td lang="uk">Поповнити банку</td><td>Pay — the final button.</td></tr>' +
+      '</table></details></li>' +
       '</ol>' +
       '<p id="wait" class="lead">Waiting for your payment… keep this page open — your license key appears here automatically, usually within a minute.</p>' +
       '<p class="note">Order <code>' + esc(o.code) + '</code>. Closed the page? Bookmark it or come back with the same link. Problems? Email ' + mail + ' with your order code.</p>';
